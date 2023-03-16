@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt install nodejs npm
 sudo npm install
 sudo apt-get install apt-transport-https

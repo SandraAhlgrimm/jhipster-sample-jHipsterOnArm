@@ -14,7 +14,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: BUILD WEBAPP
-      run: ${{ GITHUB.WORKSPACE }}/vmbuildscript.sh # Run ./mvnw -Pprod clean verify and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/target
+      run: bash ${{ GITHUB.WORKSPACE }}/vmbuildscript.sh # Run ./mvnw -Pprod clean verify and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/target
 
     - name: BUILD-CUSTOM-VM-IMAGE  
       id: imageBuilder    
@@ -27,7 +27,7 @@ jobs:
         source-image: canonical:0001-com-ubuntu-server-focal:20_04-lts-arm64:latest    
         customizer-source: '${{ GITHUB.WORKSPACE }}/target'  # This folder gets copied to the image at root
         customizer-script: |
-          sh ${{ GITHUB.WORKSPACE }}/vmrunscript.sh
+          bash ${{ GITHUB.WORKSPACE }}/vmrunscript.sh
         dist-type: 'SharedImageGallery'
         dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}/resourceGroups/vmsonarm/providers/Microsoft.Compute/galleries/vmsonarm/images/vmsonarm'
         dist-location: 'eastus2'

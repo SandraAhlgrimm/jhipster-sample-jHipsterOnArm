@@ -2,6 +2,7 @@ on: push
 
 jobs:
   BUILD-CUSTOM-UBUNTU-IMAGE:
+
     runs-on: ubuntu-latest    
     steps:
     - name: CHECKOUT
@@ -29,7 +30,7 @@ jobs:
         customizer-script: |
           sh /tmp/vmrun.sh
         dist-type: 'SharedImageGallery'
-        dist-resource-id: '/subscriptions/${{secrets.SUBSCRIPTION_ID}}/resourceGroups/vmsonarm/providers/Microsoft.Compute/galleries/vmsonarm/images/vmsonarm'
+        dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}/resourceGroups/vmsonarm/providers/Microsoft.Compute/galleries/vmsonarm/images/vmsonarm'
         dist-location: 'eastus2'
           
         

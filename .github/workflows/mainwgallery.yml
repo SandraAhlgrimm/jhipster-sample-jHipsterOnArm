@@ -8,7 +8,6 @@ jobs:
     - name: CHECKOUT
       uses: actions/checkout@v2
   
-
     - name: AZURE LOGIN 
       uses: azure/login@v1
       with:

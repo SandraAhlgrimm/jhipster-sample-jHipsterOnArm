@@ -10,5 +10,3 @@ echo installing - apt-get install apt-transport-https
 apt-get install apt-transport-https
 echo installing - apt-get update
 apt-get update
-echo installing - mvnw -Pprod clean verify
-./mvnw -Pprod clean verify

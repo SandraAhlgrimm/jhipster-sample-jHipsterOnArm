@@ -14,7 +14,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: BUILD WEBAPP
-      run: ${{ GITHUB.WORKSPACE }}buildscript.sh # Run ./mvnw -Pprod clean verify and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/target
+      run: ${{ GITHUB.WORKSPACE }}/buildscript.sh # Run ./mvnw -Pprod clean verify and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/target
 
     - name: BUILD-CUSTOM-VM-IMAGE  
       id: imageBuilder    

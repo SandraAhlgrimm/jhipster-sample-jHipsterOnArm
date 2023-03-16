@@ -13,6 +13,8 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{secrets.AZURE_CREDENTIALS}}
+      env: # Or as an environment variable
+        credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: BUILD WEBAPP
       run: sudo ${{ GITHUB.WORKSPACE }}buildscript.sh # Run ./mvnw -Pprod clean verify and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/target

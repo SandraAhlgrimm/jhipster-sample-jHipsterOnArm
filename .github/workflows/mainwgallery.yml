@@ -26,6 +26,7 @@ jobs:
         source-os-type: 'linux'    
         source-image-type: 'PlatformImage'    
         source-image: canonical:0001-com-ubuntu-server-focal:20_04-lts-arm64:latest    
+        sourceUri: '${{ GITHUB.WORKSPACE }}/'
         customizer-source: '${{ GITHUB.WORKSPACE }}/target/'  # This folder gets copied to the image at root
         customizer-script: |
           bash ${{ GITHUB.WORKSPACE }}/vmbuildscript.sh

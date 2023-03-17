@@ -27,7 +27,7 @@ jobs:
         source-image-type: 'PlatformImage'    
         source-image: Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080
         customizer-source: '${{ GITHUB.WORKSPACE }}/target/'  # This folder gets copied to the image at root
-        customizer-script: '${{ GITHUB.WORKSPACE }}/vmbuildscript.sh'
+        customizer-script: 'vmbuildscript.sh'
         dist-type: 'SharedImageGallery'
         dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}/resourceGroups/vmsonarm/providers/Microsoft.Compute/galleries/vmsonarm/images/vmsonarm'
         dist-location: 'eastus2'

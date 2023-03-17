@@ -23,7 +23,8 @@ jobs:
         resource-group-name: 'vmsonarm'
         managed-identity: 'vmsonarm'
         location: 'eastus2'
-        source-os-type: 'linux'        
+        source-os-type: 'linux'    
+        source-image-type: 'PlatformImage'    
         source-image: canonical:0001-com-ubuntu-server-focal:20_04-lts-arm64:latest    
         customizer-source: '${{ GITHUB.WORKSPACE }}/target/'  # This folder gets copied to the image at root
         customizer-script: |
@@ -32,4 +33,9 @@ jobs:
         dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}/resourceGroups/vmsonarm/providers/Microsoft.Compute/galleries/vmsonarm/images/vmsonarm'
         dist-location: 'eastus2'
           
-        
+    - name: CREATE VM
+      uses: azure/CLI@v1
+      with:
+          azcliversion: 2.0.72
+          inlineScript: |
+              az vm create --resource-group vmsonarm  --name "vmonarm-${{ GITHUB.RUN_NUMBER }}"  --admin-username azureuser --admin-password "${{ secrets.VM_PWD }}" --location  eastus2 --image "${{ steps.imageBuilder.outputs.custom-image-uri }}"          

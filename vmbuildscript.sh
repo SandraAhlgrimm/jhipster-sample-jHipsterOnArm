@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo verifying target files
+ls -l target
 echo installing - msopenjdk-11
 apt-get install msopenjdk-11
 echo installing - nodejs npm

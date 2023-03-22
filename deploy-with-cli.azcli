@@ -1,4 +1,6 @@
 
+# This Azure CLI script creates a new image from an Azure compute image gallery, based on an existing VM.  
+
 # Set Env Vars
 export RESOURCE_GROUP_NAME=<name of your resource group>
 export LOCATION=<select an arm-compatible location like eastus2>
@@ -20,11 +22,8 @@ az group create $RESOURCE_GROUP_NAME --location $LOCATION
 # Create a VM image gallery.
 az sig create --resource-group $RESOURCE_GROUP_NAME --gallery-name $IMAGE_GALLERY_NAME
 
-
-# Get the ID of the source VM to use as an image
-az vm get-instance-view -g $RESOURCE_GROUP_NAME -n $VM_NAME --query id
-
 # Create the Image Definition
+# Change the gallery-name when adding a new image
 az sig image-definition create \
    --resource-group $RESOURCE_GROUP_NAME \
    --location $LOCATION \
@@ -38,7 +37,11 @@ az sig image-definition create \
    --hyper-v-generation V2 \
    --architecture Arm64
 
+# Get the ID of the source VM to use as an image, save the result for the az sig image-version create command below.
+az vm get-instance-view -g $RESOURCE_GROUP_NAME -n $VM_NAME --query id
+
 # Create the Image Version
+# Change the version number when adding an additional version
 az sig image-version create \
    --resource-group $RESOURCE_GROUP_NAME \
    --location $LOCATION \

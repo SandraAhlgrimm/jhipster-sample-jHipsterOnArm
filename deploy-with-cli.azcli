@@ -4,6 +4,8 @@
 # Set Env Vars
 export RESOURCE_GROUP_NAME=<name of your resource group>
 export LOCATION=<select an arm-compatible location like eastus2>
+export NETWORK_NAME=<name for your network>
+export POSTGRES_NAME=<name for your postgres server>
 export VM_NAME=<name for your source VM>
 export TARGET_VM_NAME=<name for your target VM when deployed form the gallery>
 export VM_IMAGE=<name for the Compute image gallery>
@@ -17,7 +19,26 @@ export source-arm-image=<sample image: "Canonical:UbuntuServer:18_04-lts-arm64:1
 export source-arm-image-name=< sample image name: "18_04-lts-arm64">
 
 # Create a resource group.
-az group create $RESOURCE_GROUP_NAME --location $LOCATION
+az group create --resource-group $RESOURCE_GROUP_NAME --location $LOCATION
+
+# create vnet
+az network vnet create --resource-group $RESOURCE_GROUP_NAME --location $LOCATION --name $NETWORK_NAME --address-prefixes 172.0.0.0/16
+
+# create subnet
+az network vnet subnet create --resource-group $RESOURCE_GROUP_NAME --vnet-name $NETWORK_NAME --address-prefixes 172.0.0.0/24 --name $NETWORK_NAME
+
+# create private dns zone
+az network private-dns zone create --resource-group $RESOURCE_GROUP_NAME --name ${NETWORK_NAME}.private.postgres.database.azure.com
+
+az postgres flexible-server create --resource-group $RESOURCE_GROUP_NAME \
+  --name $POSTGRES_NAME --location $LOCATION \
+  --subnet /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/virtualNetworks/tesetVnet/subnets/testSubnet \
+  --private-dns-zone /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com\
+
+
+az postgres flexible-server create --resource-group testGroup --name testserver \
+  --vnet testVnet --subnet testSubnet --location testLocation \
+  --private-dns-zone /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/privateDnsZones/${NETWORK_NAME}.postgres.database.azure.com
 
 # Create a VM image gallery.
 az sig create --resource-group $RESOURCE_GROUP_NAME --gallery-name $IMAGE_GALLERY_NAME
@@ -62,3 +83,10 @@ az vm create \
    --public-ip-sku Standard \
    --generate-ssh-keys \
    --specialized
+
+#Open Ports
+   
+az vm open-port --resource-group $RESOURCE_GROUP_NAME \
+   --location $LOCATION \
+   --name $TARGET_VM_NAME \
+   --port 2222,8080 --priority 100

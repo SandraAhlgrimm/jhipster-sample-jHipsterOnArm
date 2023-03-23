@@ -1,0 +1,43 @@
+on: push
+
+jobs:
+  BUILD-CUSTOM-UBUNTU-IMAGE:
+
+    runs-on: ubuntu-latest    
+    steps:
+    - name: CHECKOUT
+      uses: actions/checkout@v2
+
+    - name: AZURE LOGIN 
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: BUILD DISTRIBUTION
+      run: bash ${{ GITHUB.WORKSPACE }}/appbuildscript.sh # Run ./mvnw -Pprod clean verify and copies built artifacts to  ${{ GITHUB.WORKSPACE }}/target
+
+    - name: BUILD-CUSTOM-VM-IMAGE  
+      id: imageBuilder    
+      uses: azure/build-vm-image@v0
+      with:        
+        resource-group-name: 'vmsonarm'
+        managed-identity: 'vmsonarm'
+        location: 'eastus2'
+        source-os-type: 'linux'    
+        source-image-type: 'PlatformImage'    
+        source-image: Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080
+        # source-uri: Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080
+        customizer-source: '${{ GITHUB.WORKSPACE }}/target/'  # This folder gets copied to the image at root      
+        customizer-script: |
+          vmbuildscript.sh
+
+        dist-type: 'SharedImageGallery'
+        dist-resource-id: '/subscriptions/${{ secrets.SUBSCRIPTION_ID }}/resourceGroups/vmsonarm/providers/Microsoft.Compute/galleries/vmsonarm/images/vmsonarm'
+        dist-location: 'eastus2'
+          
+    - name: CREATE VM
+      uses: azure/CLI@v1
+      with:
+          azcliversion: 2.0.72
+          inlineScript: |
+              az vm create --resource-group vmsonarm  --name "vmonarm-${{ GITHUB.RUN_NUMBER }}"  --admin-username azureuser --admin-password "${{ secrets.VM_PWD }}" --location  eastus2 --image "${{ steps.imageBuilder.outputs.custom-image-uri }}"          

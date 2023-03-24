@@ -41,10 +41,6 @@ az postgres flexible-server create --resource-group $RESOURCE_GROUP_NAME \
   --private-dns-zone /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/privateDnsZones/${NETWORK_NAME}.postgres.database.azure.com \
   --admin-user $POSTGRES_ADMIN_USER --admin-password $POSTGRES_ADMIN_PASSWORD
 
-az postgres flexible-server create --resource-group testGroup --name testserver \
-  --vnet testVnet --subnet testSubnet --location testLocation \
-  --private-dns-zone /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/privateDnsZones/${NETWORK_NAME}.postgres.database.azure.com
-
 # Create a VM image gallery.
 az sig create --resource-group $RESOURCE_GROUP_NAME --gallery-name $IMAGE_GALLERY_NAME
 

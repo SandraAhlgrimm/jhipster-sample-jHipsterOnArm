@@ -10,6 +10,9 @@ export VM_NAME=<name for your source VM>
 export TARGET_VM_NAME=<name for your target VM when deployed form the gallery>
 export VM_IMAGE=<name for the Compute image gallery>
 export IMAGE_GALLERY_NAME=<name for the VM image definition in the gallery>
+export $POSTGRES_ADMIN_USER=<postgres admin user name>
+export $POSTGRES_ADMIN_PASSWORD=<postgres admin password>
+
 # Find the current subscription ID
 # az account image show
 export SUBSCRIPTION_ID=<"Subscription ID>
@@ -30,11 +33,13 @@ az network vnet subnet create --resource-group $RESOURCE_GROUP_NAME --vnet-name 
 # create private dns zone
 az network private-dns zone create --resource-group $RESOURCE_GROUP_NAME --name ${NETWORK_NAME}.private.postgres.database.azure.com
 
+
+# Create a Postgres flexible server
 az postgres flexible-server create --resource-group $RESOURCE_GROUP_NAME \
   --name $POSTGRES_NAME --location $LOCATION \
-  --subnet /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/virtualNetworks/tesetVnet/subnets/testSubnet \
-  --private-dns-zone /subscriptions/{SubId}/resourceGroups/{testGroup}/providers/Microsoft.Network/privateDnsZones/testDNS.postgres.database.azure.com\
-
+  --subnet /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/virtualNetworks/${NETWORK_NAME}/subnets/${NETWORK_NAME} \
+  --private-dns-zone /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/privateDnsZones/${NETWORK_NAME}.postgres.database.azure.com \
+  --admin-user $POSTGRES_ADMIN_USER --admin-password $POSTGRES_ADMIN_PASSWORD
 
 az postgres flexible-server create --resource-group testGroup --name testserver \
   --vnet testVnet --subnet testSubnet --location testLocation \
@@ -80,6 +85,8 @@ az vm create \
    --location $LOCATION \
    --name $TARGET_VM_NAME \
    --image "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/galleries/${IMAGE_GALLERY_NAME}/images/${IMAGE_GALLERY_NAME}" \
+   --vnet-name $NETWORK_NAME \
+   --subnet $NETWORK_NAME \
    --public-ip-sku Standard \
    --generate-ssh-keys \
    --specialized

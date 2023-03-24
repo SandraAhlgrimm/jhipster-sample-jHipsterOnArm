@@ -162,5 +162,5 @@ Desktop.ini
 ######################
 # Configuration files
 ######################
-/resources/config/application-prod.yml
 .env
+src/main/resources/config/application-prod.yml

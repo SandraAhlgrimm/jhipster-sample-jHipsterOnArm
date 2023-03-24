@@ -1,7 +1,7 @@
 
 # This Azure CLI script creates a new image from an Azure compute image gallery, based on an existing VM.  
 
-# Set Env Vars
+# Set Env Vars, can be set in .env file
 export RESOURCE_GROUP_NAME=<name of your resource group>
 export LOCATION=<select an arm-compatible location like eastus2>
 export NETWORK_NAME=<name for your network>
@@ -10,14 +10,17 @@ export VM_NAME=<name for your source VM>
 export TARGET_VM_NAME=<name for your target VM when deployed form the gallery>
 export VM_IMAGE=<name for the Compute image gallery>
 export IMAGE_GALLERY_NAME=<name for the VM image definition in the gallery>
-export $POSTGRES_ADMIN_USER=<postgres admin user name>
-export $POSTGRES_ADMIN_PASSWORD=<postgres admin password>
+export POSTGRES_ADMIN_USER=<postgres admin user name>
+export POSTGRES_ADMIN_PASSWORD=<postgres admin password>
+
+#!/usr/bin/env bash
+# source .env
 
 # Find the current subscription ID
 # az account image show
-export SUBSCRIPTION_ID=<"Subscription ID>
+export SUBSCRIPTION_ID=<Subscription ID>
 # Find ARM images published by canonical: 
-# az vm image list --all --architecture Arm64 --publisher Canonical -o table
+az vm image list --all --architecture Arm64 --publisher Canonical -o table
 export source-arm-image=<sample image: "Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080">
 export source-arm-image-name=< sample image name: "18_04-lts-arm64">
 
@@ -40,10 +43,6 @@ az postgres flexible-server create --resource-group $RESOURCE_GROUP_NAME \
   --subnet /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/virtualNetworks/${NETWORK_NAME}/subnets/${NETWORK_NAME} \
   --private-dns-zone /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/privateDnsZones/${NETWORK_NAME}.postgres.database.azure.com \
   --admin-user $POSTGRES_ADMIN_USER --admin-password $POSTGRES_ADMIN_PASSWORD
-
-az postgres flexible-server create --resource-group testGroup --name testserver \
-  --vnet testVnet --subnet testSubnet --location testLocation \
-  --private-dns-zone /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Network/privateDnsZones/${NETWORK_NAME}.postgres.database.azure.com
 
 # Create a VM image gallery.
 az sig create --resource-group $RESOURCE_GROUP_NAME --gallery-name $IMAGE_GALLERY_NAME
@@ -74,7 +73,6 @@ az sig image-version create \
    --gallery-name $IMAGE_GALLERY_NAME \
    --gallery-image-definition $VM_IMAGE \
    --gallery-image-version 1.0.1 \
-   --target-regions "East US 2" \
    --replica-count 1 \
    --virtual-machine "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/virtualMachines/${VM_NAME}"
 
@@ -91,7 +89,7 @@ az vm create \
    --generate-ssh-keys \
    --specialized
 
-#Open Ports
+# Optional open ports
    
 az vm open-port --resource-group $RESOURCE_GROUP_NAME \
    --location $LOCATION \

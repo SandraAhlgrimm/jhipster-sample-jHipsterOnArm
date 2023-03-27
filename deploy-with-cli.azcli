@@ -1,14 +1,23 @@
 
 # This Azure CLI script creates a new image from an Azure compute image gallery, based on an existing VM.  
+# NOTE - Locations are very important!  
+# The locations/region that you choose must support Postgres and ARM VM images
+# The source VM must be in the same region as the image gallery.
+# Check for availability: https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/
 
 # Set Env Vars, can be set in .env file
 export RESOURCE_GROUP_NAME=<name of your resource group>
 export LOCATION=<select an arm-compatible location like eastus2>
 export NETWORK_NAME=<name for your network>
+export NETWORK_SUBNET_NAME=<name for the subnet in your network>
+export NETWORK_SECURITY_GROUP=<name for your network security group>
 export POSTGRES_NAME=<name for your postgres server>
 export VM_NAME=<name for your source VM>
+export SOURCE_VM_NAME=<name for your source VM>
+export SOURCE_RESOURCE_GROUP_NAME=<name for your source VM resource group>
 export TARGET_VM_NAME=<name for your target VM when deployed form the gallery>
 export VM_IMAGE=<name for the Compute image gallery>
+export VM_IMAGE_VERSION=<version number for the VM image definition in the gallery>
 export IMAGE_GALLERY_NAME=<name for the VM image definition in the gallery>
 export POSTGRES_ADMIN_USER=<postgres admin user name>
 export POSTGRES_ADMIN_PASSWORD=<postgres admin password>
@@ -20,9 +29,9 @@ export POSTGRES_ADMIN_PASSWORD=<postgres admin password>
 # az account image show
 export SUBSCRIPTION_ID=<Subscription ID>
 # Find ARM images published by canonical: 
-az vm image list --all --architecture Arm64 --publisher Canonical -o table
-export source-arm-image=<sample image: "Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080">
-export source-arm-image-name=< sample image name: "18_04-lts-arm64">
+# az vm image list --all --architecture Arm64 --publisher Canonical -o table
+export sourcearmimage=<sample image: "Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080">
+export sourcearmimage-name=< sample image name: "18_04-lts-arm64">
 
 # Create a resource group.
 az group create --resource-group $RESOURCE_GROUP_NAME --location $LOCATION
@@ -49,19 +58,19 @@ az sig create --resource-group $RESOURCE_GROUP_NAME --gallery-name $IMAGE_GALLER
 
 # Create the Image Definition
 # Change the gallery-name when adding a new image
-az sig image-definition create \
-   --resource-group $RESOURCE_GROUP_NAME \
-   --location $LOCATION \
-   --gallery-name $IMAGE_GALLERY_NAME \
-   --gallery-image-definition $VM_IMAGE \
-   --publisher Canonical \
-   --offer UbuntuServer \
-   --sku ${source-arm-image-name} \
-   --os-type Linux \
-   --os-state specialized \
-   --hyper-v-generation V2 \
-   --architecture Arm64
-
+ az sig image-definition create \
+    --resource-group $RESOURCE_GROUP_NAME \
+    --location $LOCATION \
+    --gallery-name $IMAGE_GALLERY_NAME \
+    --gallery-image-definition $VM_IMAGE \
+    --publisher Canonical \
+    --offer UbuntuServer \
+    --sku ${sourcearmimagename} \
+    --os-type Linux \
+    --os-state specialized \
+    --hyper-v-generation V2 \
+    --architecture Arm64
+    
 # Get the ID of the source VM to use as an image, save the result for the az sig image-version create command below.
 az vm get-instance-view -g $RESOURCE_GROUP_NAME -n $VM_NAME --query id
 
@@ -72,9 +81,10 @@ az sig image-version create \
    --location $LOCATION \
    --gallery-name $IMAGE_GALLERY_NAME \
    --gallery-image-definition $VM_IMAGE \
-   --gallery-image-version 1.0.1 \
+   --gallery-image-version $VM_IMAGE_VERSION \
+   --target-regions "East US" \
    --replica-count 1 \
-   --virtual-machine "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/virtualMachines/${VM_NAME}"
+   --virtual-machine "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${SOURCE_RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/virtualMachines/${SOURCE_VM_NAME}"
 
 # Create a VM from the image gallery 
 
@@ -82,14 +92,16 @@ az vm create \
    --resource-group $RESOURCE_GROUP_NAME \
    --location $LOCATION \
    --name $TARGET_VM_NAME \
-   --image "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/galleries/${IMAGE_GALLERY_NAME}/images/${IMAGE_GALLERY_NAME}" \
+   --image "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/galleries/${IMAGE_GALLERY_NAME}/images/${VM_IMAGE}/versions/${VM_IMAGE_VERSION}" \
    --vnet-name $NETWORK_NAME \
-   --subnet $NETWORK_NAME \
+   --subnet $NETWORK_SUBNET_NAME \
    --public-ip-sku Standard \
    --generate-ssh-keys \
+   --nsg $NETWORK_SECURITY_GROUP \
    --specialized
 
-# Optional open ports
+   
+# Optional - Open Ports
    
 az vm open-port --resource-group $RESOURCE_GROUP_NAME \
    --location $LOCATION \

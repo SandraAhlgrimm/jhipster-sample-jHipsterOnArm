@@ -5,7 +5,7 @@
 # The source VM must be in the same region as the image gallery.
 # Check for availability: https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/
 
-# Set Env Vars
+# Set Env Vars, can be set in .env file
 export RESOURCE_GROUP_NAME=<name of your resource group>
 export LOCATION=<select an arm-compatible location like eastus2>
 export NETWORK_NAME=<name for your network>
@@ -19,12 +19,15 @@ export TARGET_VM_NAME=<name for your target VM when deployed form the gallery>
 export VM_IMAGE=<name for the Compute image gallery>
 export VM_IMAGE_VERSION=<version number for the VM image definition in the gallery>
 export IMAGE_GALLERY_NAME=<name for the VM image definition in the gallery>
-export $POSTGRES_ADMIN_USER=<postgres admin user name>
-export $POSTGRES_ADMIN_PASSWORD=<postgres admin password>
+export POSTGRES_ADMIN_USER=<postgres admin user name>
+export POSTGRES_ADMIN_PASSWORD=<postgres admin password>
+
+#!/usr/bin/env bash
+# source .env
 
 # Find the current subscription ID
 # az account image show
-export SUBSCRIPTION_ID=<"Subscription ID>
+export SUBSCRIPTION_ID=<Subscription ID>
 # Find ARM images published by canonical: 
 # az vm image list --all --architecture Arm64 --publisher Canonical -o table
 export sourcearmimage=<sample image: "Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080">

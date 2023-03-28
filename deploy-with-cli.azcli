@@ -29,7 +29,7 @@ export POSTGRES_ADMIN_PASSWORD=<postgres admin password>
 # az account image show
 export SUBSCRIPTION_ID=<Subscription ID>
 # Find ARM images published by canonical: 
-# az vm image list --all --architecture Arm64 --publisher Canonical -o table
+# az vm image list --all --architecture Arm64 --publisher Canonical --output table
 export sourcearmimage=<sample image: "Canonical:UbuntuServer:18_04-lts-arm64:18.04.202303080">
 export sourcearmimage-name=< sample image name: "18_04-lts-arm64">
 
@@ -82,7 +82,6 @@ az sig image-version create \
    --gallery-name $IMAGE_GALLERY_NAME \
    --gallery-image-definition $VM_IMAGE \
    --gallery-image-version $VM_IMAGE_VERSION \
-   --target-regions "East US" \
    --replica-count 1 \
    --virtual-machine "/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${SOURCE_RESOURCE_GROUP_NAME}/providers/Microsoft.Compute/virtualMachines/${SOURCE_VM_NAME}"
 
@@ -98,7 +97,8 @@ az vm create \
    --public-ip-sku Standard \
    --generate-ssh-keys \
    --nsg $NETWORK_SECURITY_GROUP \
-   --specialized
+   --specialized \
+   --size Standard_D2ps_v5
 
    
 # Optional - Open Ports
